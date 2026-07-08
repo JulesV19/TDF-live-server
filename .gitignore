@@ -1,0 +1,15 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Données générées par le scraper
+data/
+
+# App iOS — dépôt git indépendant (voir TDF Live/)
+TDF Live/
