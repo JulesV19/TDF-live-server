@@ -4,7 +4,7 @@ Petit serveur qui récupère la télémétrie live du Tour de France depuis l'AP
 `racecenter.letour.fr`, calcule la distance restante et regroupe les coureurs par écart, puis
 expose le résultat en HTTP pour l'app et le widget iOS.
 
-> L'app / le widget iOS vivent dans un dépôt séparé (`TDF Live/`).
+> L'app / le widget iOS vivent dans un [dépôt séparé](https://github.com/JulesV19/TDF-live-widget).
 
 ## Mise en route
 
