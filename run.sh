@@ -5,6 +5,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
+# Charge les variables d'env (URL/token de publication…) depuis .env s'il existe.
+[ -f .env ] && set -a && . ./.env && set +a
+
 PY=.venv/bin/python
 [ -x "$PY" ] || PY=python3
 

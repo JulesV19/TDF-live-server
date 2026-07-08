@@ -12,6 +12,8 @@ from typing import Callable
 import httpx
 
 from .config import (
+    MOCK_INTERVAL,
+    MOCK_LIVE,
     POLL_INTERVAL_IDLE,
     POLL_INTERVAL_LIVE,
     TELEMETRY_URL,
@@ -52,11 +54,19 @@ async def poll_loop(on_telemetry: Callable[[dict], None]):
 
 
 async def mock_loop(on_telemetry: Callable[[dict], None], meta_getter: Callable[[], object]):
-    """Boucle de démo : télémétrie synthétique qui évolue toutes les 10 s."""
-    from .mock import make_telemetry
+    """Boucle de démo : télémétrie synthétique qui évolue à la cadence MOCK_INTERVAL.
+
+    Si MOCK_LIVE est faux, émet un état 'hors course' figé (pour tester le message
+    'pas d'étape en cours')."""
+    from .mock import make_offrace, make_telemetry
+
+    if not MOCK_LIVE:
+        while True:
+            on_telemetry(make_offrace())
+            await asyncio.sleep(MOCK_INTERVAL)
 
     step = 0
     while True:
         on_telemetry(make_telemetry(meta_getter(), step))
-        step = (step + 1) % 40          # ~6-7 min de scénario, puis rejoue
-        await asyncio.sleep(10)
+        step = (step + 1) % 40          # 40 pas de scénario, puis rejoue
+        await asyncio.sleep(MOCK_INTERVAL)

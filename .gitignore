@@ -11,5 +11,8 @@ __pycache__/
 # Données générées par le scraper
 data/
 
+# Secrets (URL/token de publication)
+.env
+
 # App iOS — dépôt git indépendant (voir TDF Live/)
 TDF Live/

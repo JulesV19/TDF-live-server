@@ -1,0 +1,13 @@
+name = "tdf-live"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Namespace KV où l'on stocke le dernier snapshot.
+# Remplace l'id ci-dessous par celui que renvoie :
+#   wrangler kv namespace create TDF
+[[kv_namespaces]]
+binding = "TDF"
+id = "d7b7e288c5a34b4b88c6de4d88dded0d"
+
+# Le token d'écriture n'est PAS ici : c'est un secret.
+#   wrangler secret put PUBLISH_TOKEN

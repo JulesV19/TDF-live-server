@@ -11,14 +11,18 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from . import config, feed, normalize, state
+from . import config, feed, normalize, publish, state
 from .metadata import load_metadata
 
 _meta = None  # métadonnées chargées au démarrage
 
 
 def _handle_telemetry(telemetry: dict) -> None:
-    state.set_state(normalize.build_race_state(telemetry, _meta))
+    race_state = normalize.build_race_state(telemetry, _meta)
+    state.set_state(race_state)
+    # Pousse aussi le snapshot vers le Worker (si configuré), sans bloquer le poll.
+    if publish.enabled():
+        asyncio.create_task(publish.publish(race_state))
 
 
 @asynccontextmanager
@@ -30,7 +34,10 @@ async def lifespan(app: FastAPI):
         f"{len(_meta.teams)} équipes, {len(_meta.stages)} étapes"
     )
     if config.MOCK:
-        print("[api] MODE MOCK — télémétrie synthétique (pas d'appel à l'API letour)")
+        print(
+            f"[api] MODE MOCK — télémétrie synthétique toutes les {config.MOCK_INTERVAL}s "
+            "(pas d'appel à l'API letour)"
+        )
         task = asyncio.create_task(feed.mock_loop(_handle_telemetry, lambda: _meta))
     else:
         print(
@@ -38,10 +45,13 @@ async def lifespan(app: FastAPI):
             f"(course) / {config.POLL_INTERVAL_IDLE}s (repos)"
         )
         task = asyncio.create_task(feed.poll_loop(_handle_telemetry))
+    if publish.enabled():
+        print(f"[api] publication distante activée → {config.PUBLISH_URL}")
     try:
         yield
     finally:
         task.cancel()
+        await publish.aclose()
 
 
 app = FastAPI(title="TDF Live Server", lifespan=lifespan)
